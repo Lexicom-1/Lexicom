@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sistema de Asistencia RRHH</title>
+  <title>Sistema de Asistencia Lexicom</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1a73e8">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2838/2838912.png">
+  <link rel="apple-touch-icon" href="descarga.png">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -82,15 +82,24 @@
       border-top: 1px solid #e2e8f0;
       text-align: center;
     }
+    .panel-excepcion {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 8px;
+      padding: 14px;
+      margin-top: 12px;
+      margin-bottom: 12px;
+      text-align: left;
+    }
   </style>
 </head>
 <body>
   <div class="contenedor">
-    <h2 id="tituloPortal">Sistema de Asistencia</h2>
+    <h2>Sistema de Asistencia</h2>
     
     <div id="usuarioAutenticado" style="display:none; text-align:center; margin-bottom:12px; color:#16a34a; font-weight:bold; font-size:14px;"></div>
     
-    <!-- Botón perfil -->
+    <!-- Botón Perfil -->
     <div id="panelAccionesPostLogin" style="display:none; margin-bottom:12px;">
       <button class="btn-perfil" onclick="abrirModalPerfil()">👤 Mis Datos y Cuenta Bancaria</button>
     </div>
@@ -99,7 +108,7 @@
     <div id="modalPerfil" class="caja-perfil" style="display:none;">
       <h3 style="margin-top:0;">Mi Perfil y Datos de Abono</h3>
       <p style="font-size:12px; color:#64748b; margin-top:-5px; text-align:center;">
-        Completa tus datos para el pago por Recursos Humanos.
+        Completa tus datos para el pago de haberes por Recursos Humanos.
       </p>
 
       <label>Sede Asignada:</label>
@@ -152,25 +161,25 @@
       <button onclick="cerrarModalPerfil()" class="btn-secundario">Cerrar</button>
     </div>
 
-    <!-- Bloque Login -->
+    <!-- 1. Bloque Login DNI -->
     <div id="loginPanel">
-      <label id="lblLogin" style="margin-top:0;">Ingresa tu documento de identidad:</label>
-      <input id="docLogin" type="tel" maxlength="11" placeholder="DNI (8 dígitos) o RUC">
+      <label style="margin-top:0;">Ingresa tu documento de identidad:</label>
+      <input id="docLogin" type="tel" maxlength="8" placeholder="Número de DNI (8 dígitos)">
       <button onclick="enviarOTP()">Enviar código de acceso</button>
     </div>
 
-    <!-- Bloque OTP -->
+    <!-- 2. Bloque OTP -->
     <div id="otpPanel" style="display:none;">
       <label>Código de verificación recibido en tu correo:</label>
       <input id="otp" type="text" maxlength="6" placeholder="Código de 6 dígitos">
       <button onclick="validarCodigo()">Validar código e ingresar</button>
     </div>
 
-    <!-- Bloque Registro Nuevo -->
+    <!-- 3. Bloque Registro Solicitud Nuevo Trabajador -->
     <div id="registroPanel" style="display:none;">
-      <h3 id="tituloRegistro">Registro de Nuevo Trabajador</h3>
-      <label>DNI o RUC:</label>
-      <input id="regDni" placeholder="DNI (8 dígitos) o RUC" maxlength="11">
+      <h3>Registro de Nuevo Trabajador</h3>
+      <label>DNI:</label>
+      <input id="regDni" placeholder="DNI (8 dígitos)" maxlength="8">
       
       <label>Correo Electrónico:</label>
       <input id="regCorreo" type="email" placeholder="correo@ejemplo.com">
@@ -191,70 +200,83 @@
 
       <label>Sede de Trabajo:</label>
       <select id="regSede"></select>
-
-      <div id="campoServicioExtra" style="display:none;">
-        <label>Descripción del Servicio / Cargo:</label>
-        <input id="regServicio" placeholder="Ej. Soporte TI, Contador externo">
-      </div>
       
-      <button onclick="registrarNuevo()" style="background:#059669; margin-top:5px;">Enviar Solicitud a RRHH</button>
+      <button onclick="registrarNuevoTrabajador()" style="background:#059669; margin-top:5px;">Enviar Solicitud a RRHH</button>
     </div>
 
-    <!-- Bloque Asistencia / Actividad -->
+    <!-- 4. Bloque Marcaje y GPS -->
     <div id="marcajePanel" style="display:none;">
-      <div id="bloquePlanilla">
-        <button onclick="obtenerUbicacion()">📍 Obtener ubicación GPS</button>
-        <div id="gpsResultado"></div>
-      </div>
+      <button onclick="obtenerUbicacion()">📍 Obtener ubicación GPS</button>
+      <div id="gpsResultado"></div>
 
-      <div id="bloqueHonorarios" style="display:none;">
-        <label>Sede / Modalidad de hoy:</label>
-        <select id="sedeActividad"></select>
-
-        <label>Labor o entregable de hoy:</label>
-        <textarea id="descripcionActividad" rows="3" placeholder="Detalle de actividades desarrolladas hoy..."></textarea>
-      </div>
-
+      <!-- Cámara 1: Selfie Personal -->
       <input type="file" id="cameraInput" accept="image/*" capture="user" style="display:none;" onchange="procesarFoto(event)">
-      <button id="btnAbrirCamara" onclick="abrirCamara()" style="display:none; background:#0f9d58;">📷 Tomar Selfie / Foto de Evidencia</button>
+      <button id="btnAbrirCamara" onclick="abrirCamara()" style="display:none; background:#0f9d58;">📷 Tomar Selfie</button>
 
       <img id="previewSelfie" style="display:none; width:100%; border-radius:8px; margin-top:10px; border: 1px solid #ddd;">
       <canvas id="canvasCompresor" style="display:none;"></canvas>
       <div id="fotoEstado" style="color:#16a34a; font-weight:bold; margin-top:8px; text-align:center;"></div>
       <br>
 
+      <!-- Panel dinámico de Justificación / Fuera de Sede -->
+      <div id="panelExcepcion" class="panel-excepcion" style="display:none;">
+        <h4 style="margin:0 0 6px 0; color:#c2410c;">⚠️ Fuera de Sede Detectado</h4>
+        <p style="font-size:12px; color:#7c2d12; margin:0 0 10px 0;">
+          Selecciona el motivo y adjunta la foto del comprobante o constancia médica.
+        </p>
+
+        <label>Motivo de la marcación:</label>
+        <select id="motivoExcepcion">
+          <option value="TRAMITE_AGENCIA">📦 Comisión de Servicio / Trámite en Agencia</option>
+          <option value="CITA_MEDICA">🏥 Cita Médica / EsSalud / Clínica</option>
+          <option value="OTRA_SEDE">🏢 Trabajo en otra Sede</option>
+          <option value="PERMISO_AUTORIZADO">📝 Permiso / Salida autorizada</option>
+        </select>
+
+        <label>Detalle de la labor o justificación:</label>
+        <input id="detalleExcepcion" placeholder="Ej. Shalom La Victoria, Policlínico Grau...">
+
+        <!-- Cámara 2: Foto de Evidencia / Documento -->
+        <input type="file" id="evidenciaInput" accept="image/*" capture="environment" style="display:none;" onchange="procesarFotoEvidencia(event)">
+        <button type="button" onclick="document.getElementById('evidenciaInput').click()" style="background:#ea580c; font-size:13px; padding:10px;">
+          📎 Tomar Foto del Comprobante / Constancia
+        </button>
+
+        <img id="previewEvidencia" style="display:none; width:100%; border-radius:6px; margin-top:8px; border:1px solid #cbd5e1;">
+        <div id="evidenciaEstado" style="color:#c2410c; font-size:12px; font-weight:bold; margin-top:4px; text-align:center;"></div>
+      </div>
+
       <div id="botonesMarcajePlanilla">
         <button id="btnIngreso" onclick="ejecutarMarcaje('INGRESO')" style="display:none;">Registrar Ingreso</button>
         <button id="btnSalida" onclick="ejecutarMarcaje('SALIDA')" style="display:none;">Registrar Salida</button>
       </div>
-
-      <button id="btnGuardarHonorarios" onclick="ejecutarMarcajeHonorarios()" style="display:none; background:#0284c7;">✅ Registrar actividad de hoy</button>
     </div>
 
+    <!-- Mensajes de feedback -->
     <div id="mensaje"></div>
 
+    <!-- 5. Pie con botón 'Registrarse' -->
     <div id="pieRegistro" class="pie-registro">
       <button id="btnAlternarRegistro" class="btn-secundario" onclick="alternarRegistro()">Registrarse</button>
     </div>
   </div>
 
   <script>
-    // URL DE TU WEB APP EN GOOGLE APPS SCRIPT
     const API_URL = "https://script.google.com/macros/s/AKfycbznyYRoE6A9dH6dGPlNYhN9QunCgc9coY7e578WspkOQl_ULHSdUaF4HPoiJ1naUW0I/exec";
 
-    const isHonorarios = new URLSearchParams(window.location.search).get("portal") === "honorarios";
     let correoUsuario = null;
     let docUsuario = null;
     let modoRegistro = false;
     let latitudActual = null;
     let longitudActual = null;
     let selfieActual = null;
+    let evidenciaActual = null;
+    let requiereExcepcion = false;
 
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("sw.js").catch(console.error);
     }
 
-    // Llamada fetch segura compatible con CORS
     async function llamarAPI(payload) {
       const response = await fetch(API_URL, {
         method: "POST",
@@ -264,14 +286,13 @@
     }
 
     function obtenerDeviceId() {
-      const storageKey = isHonorarios ? "honorarios_device_token" : "asistencia_device_token";
-      let devId = localStorage.getItem(storageKey);
+      let devId = localStorage.getItem("asistencia_device_token");
       if (!devId) {
         const ua = navigator.userAgent;
         let modelo = /android/i.test(ua) ? "Android" : (/iPhone|iPad/i.test(ua) ? "iPhone" : "Movil");
         const randomHex = Math.random().toString(16).substring(2, 10).toUpperCase();
         devId = modelo + "_" + randomHex;
-        localStorage.setItem(storageKey, devId);
+        localStorage.setItem("asistencia_device_token", devId);
       }
       return devId;
     }
@@ -285,15 +306,6 @@
     }
 
     window.onload = async function() {
-      if (isHonorarios) {
-        document.getElementById("tituloPortal").innerText = "Portal de Honorarios";
-        document.getElementById("lblLogin").innerText = "Ingresa tu documento (DNI o RUC):";
-        document.getElementById("btnAlternarRegistro").innerText = "Registrarse como nuevo locador";
-        document.getElementById("tituloRegistro").innerText = "Registro de Nuevo Locador";
-        document.getElementById("campoServicioExtra").style.display = "block";
-      }
-
-      // Cargar sedes dinámicas desde la API
       try {
         const res = await llamarAPI({ accion: "obtenerSedes" });
         if (res.ok && res.sedes) {
@@ -301,7 +313,6 @@
           res.sedes.forEach(s => html += `<option value="${s.codigo}">${s.codigo} - ${s.nombre}</option>`);
           document.getElementById("regSede").innerHTML = html;
           document.getElementById("perfilSede").innerHTML = html;
-          document.getElementById("sedeActividad").innerHTML = html;
         }
       } catch (err) {
         console.error("Error al cargar sedes:", err);
@@ -319,15 +330,11 @@
 
     async function enviarOTP() {
       const doc = document.getElementById("docLogin").value.trim();
-      if (!doc) return mostrarMensaje("Ingresa tu número de documento", "error");
+      if (!doc || doc.length !== 8) return mostrarMensaje("Ingresa un DNI válido de 8 dígitos", "error");
 
-      mostrarMensaje("Verificando documento y enviando código...", "ok");
+      mostrarMensaje("Verificando DNI y enviando código...", "ok");
       try {
-        const res = await llamarAPI({
-          accion: isHonorarios ? "enviarOTPHonorarios" : "enviarOTP",
-          dni: doc,
-          dniRuc: doc
-        });
+        const res = await llamarAPI({ accion: "enviarOTP", dni: doc });
         if (res.ok) {
           docUsuario = doc;
           correoUsuario = res.correo;
@@ -345,12 +352,12 @@
       const codigo = document.getElementById("otp").value.trim();
       if (!codigo) return mostrarMensaje("Ingresa el código OTP", "error");
 
-      mostrarMensaje("Validando código...", "ok");
+      mostrarMensaje("Validando código y verificando dispositivo...", "ok");
       const deviceId = obtenerDeviceId();
 
       try {
         const res = await llamarAPI({
-          accion: isHonorarios ? "validarOTPHonorarios" : "validarOTP",
+          accion: "validarOTP",
           correo: correoUsuario,
           codigo: codigo,
           deviceId: deviceId
@@ -363,26 +370,13 @@
 
           const userLabel = document.getElementById("usuarioAutenticado");
           userLabel.style.display = "block";
-          userLabel.innerHTML = `✅ Identificado: ${docUsuario}<br><small style="color:#64748b;">${correoUsuario}</small>`;
+          userLabel.innerHTML = `✅ Identificado: DNI ${docUsuario}<br><small style="color:#64748b;">${correoUsuario}</small>`;
 
           document.getElementById("panelAccionesPostLogin").style.display = "block";
           document.getElementById("marcajePanel").style.display = "block";
 
-          if (isHonorarios) {
-            document.getElementById("bloquePlanilla").style.display = "none";
-            document.getElementById("bloqueHonorarios").style.display = "block";
-            document.getElementById("btnAbrirCamara").style.display = "block";
-            document.getElementById("btnGuardarHonorarios").style.display = "block";
-            if (navigator.geolocation) {
-              navigator.geolocation.getCurrentPosition(p => {
-                latitudActual = p.coords.latitude;
-                longitudActual = p.coords.longitude;
-              }, null, { enableHighAccuracy: true });
-            }
-          } else {
-            const estadoRes = await llamarAPI({ accion: "obtenerEstadoHoy", correo: correoUsuario });
-            configurarBotonesPlanilla(estadoRes.estado);
-          }
+          const estadoRes = await llamarAPI({ accion: "obtenerEstadoHoy", correo: correoUsuario });
+          configurarBotonesPlanilla(estadoRes.estado);
         } else {
           mostrarMensaje(res.mensaje, "error");
         }
@@ -394,10 +388,7 @@
     async function abrirModalPerfil() {
       mostrarMensaje("Cargando perfil...", "ok");
       try {
-        const res = await llamarAPI({
-          accion: isHonorarios ? "obtenerPerfilHonorarios" : "obtenerPerfil",
-          correo: correoUsuario
-        });
+        const res = await llamarAPI({ accion: "obtenerPerfil", correo: correoUsuario });
         document.getElementById("mensaje").style.display = "none";
         if (res.ok && res.datos) {
           document.getElementById("perfilCelular").value = res.datos.celular || "";
@@ -406,7 +397,16 @@
           document.getElementById("perfilTipoCuenta").value = res.datos.tipoCuenta || "AHORROS";
           document.getElementById("perfilNumCuenta").value = res.datos.numCuenta || "";
           document.getElementById("perfilCci").value = res.datos.cci || "";
-          if (res.datos.sede) document.getElementById("perfilSede").value = res.datos.sede;
+          if (res.datos.sede) {
+            const selectSede = document.getElementById("perfilSede");
+            const normalizada = res.datos.sede.toString().replace(/_/g, " ").trim().toUpperCase();
+            for (let i = 0; i < selectSede.options.length; i++) {
+              if (selectSede.options[i].value.replace(/_/g, " ").trim().toUpperCase() === normalizada) {
+                selectSede.selectedIndex = i;
+                break;
+              }
+            }
+          }
         }
         document.getElementById("modalPerfil").style.display = "block";
       } catch (err) {
@@ -432,11 +432,7 @@
       };
 
       try {
-        const res = await llamarAPI({
-          accion: isHonorarios ? "actualizarPerfilHonorarios" : "actualizarPerfil",
-          correo: correoUsuario,
-          datos: datos
-        });
+        const res = await llamarAPI({ accion: "actualizarPerfil", correo: correoUsuario, datos: datos });
         mostrarMensaje(res.mensaje, res.ok ? "ok" : "error");
         if (res.ok) cerrarModalPerfil();
       } catch (err) {
@@ -465,7 +461,7 @@
       const file = e.target.files[0];
       if (!file) return;
 
-      mostrarMensaje("Procesando imagen...", "ok");
+      mostrarMensaje("Procesando selfie...", "ok");
       const reader = new FileReader();
       reader.onload = ev => {
         const img = new Image();
@@ -484,7 +480,37 @@
           preview.src = selfieActual;
           preview.style.display = "block";
           document.getElementById("fotoEstado").innerHTML = "✅ Selfie lista";
-          document.getElementById("btnAbrirCamara").innerHTML = "🔄 Tomar otra foto";
+          document.getElementById("btnAbrirCamara").innerHTML = "🔄 Tomar otra selfie";
+          document.getElementById("mensaje").style.display = "none";
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function procesarFotoEvidencia(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      mostrarMensaje("Procesando foto de evidencia...", "ok");
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 800;
+          let w = img.width, h = img.height;
+          if (w > h && w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
+          else if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
+
+          const canvas = document.getElementById("canvasCompresor");
+          canvas.width = w; canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+
+          evidenciaActual = canvas.toDataURL("image/jpeg", 0.8);
+          const preview = document.getElementById("previewEvidencia");
+          preview.src = evidenciaActual;
+          preview.style.display = "block";
+          document.getElementById("evidenciaEstado").innerHTML = "✅ Foto de comprobante lista";
           document.getElementById("mensaje").style.display = "none";
         };
         img.src = ev.target.result;
@@ -494,17 +520,30 @@
 
     async function ejecutarMarcaje(tipo) {
       if (!latitudActual || !longitudActual) return mostrarMensaje("Obtén tu ubicación GPS", "error");
-      if (!selfieActual) return mostrarMensaje("Tómate una selfie", "error");
+      if (!selfieActual) return mostrarMensaje("Tómate una selfie primero", "error");
+
+      if (requiereExcepcion) {
+        const detalle = document.getElementById("detalleExcepcion").value.trim();
+        if (!detalle) return mostrarMensaje("Escribe la justificación o detalle del trámite", "error");
+        if (!evidenciaActual) return mostrarMensaje("Toma una foto al comprobante o constancia médica", "error");
+      }
 
       const boton = (tipo === "INGRESO") ? document.getElementById("btnIngreso") : document.getElementById("btnSalida");
       boton.disabled = true;
-      boton.innerHTML = "Subiendo foto...";
+      boton.innerHTML = "Subiendo fotos...";
 
       try {
         const fotoRes = await llamarAPI({ accion: "guardarSelfie", correo: correoUsuario, imagenBase64: selfieActual });
+
+        let urlEvidencia = "";
+        if (requiereExcepcion && evidenciaActual) {
+          const evidRes = await llamarAPI({ accion: "guardarSelfie", correo: correoUsuario + "_EVIDENCIA", imagenBase64: evidenciaActual });
+          urlEvidencia = evidRes.url;
+        }
+
         boton.innerHTML = `Marcando ${tipo.toLowerCase()}...`;
 
-        const res = await llamarAPI({
+        const payload = {
           accion: "marcarAsistencia",
           correo: correoUsuario,
           tipo: tipo,
@@ -512,7 +551,28 @@
           longitud: longitudActual,
           urlFoto: fotoRes.url,
           deviceId: obtenerDeviceId()
-        });
+        };
+
+        if (requiereExcepcion) {
+          payload.datosExcepcion = {
+            esExcepcion: true,
+            motivo: document.getElementById("motivoExcepcion").value,
+            detalle: document.getElementById("detalleExcepcion").value.trim(),
+            evidenciaUrl: urlEvidencia
+          };
+        }
+
+        const res = await llamarAPI(payload);
+
+        // Si el sistema detecta fuera de geocerca por primera vez
+        if (!res.ok && res.fueraGeocerca) {
+          requiereExcepcion = true;
+          document.getElementById("panelExcepcion").style.display = "block";
+          boton.disabled = false;
+          boton.innerHTML = `Registrar ${tipo} con Justificación`;
+          mostrarMensaje(res.mensaje, "error");
+          return;
+        }
 
         mostrarMensaje(res.mensaje, res.ok ? "ok" : "error");
         if (res.ok) {
@@ -522,10 +582,11 @@
             if (tipo === "INGRESO") {
               document.getElementById("btnIngreso").style.display = "none";
               document.getElementById("btnSalida").style.display = "block";
+              document.getElementById("panelExcepcion").style.display = "none";
             } else {
               document.getElementById("marcajePanel").innerHTML = "<h2 style='color:#16a34a;'>✅ Jornada completada</h2>";
             }
-          }, 1200);
+          }, 1500);
         } else {
           boton.disabled = false;
           boton.innerHTML = `Registrar ${tipo}`;
@@ -536,52 +597,7 @@
       }
     }
 
-    async function ejecutarMarcajeHonorarios() {
-      const desc = document.getElementById("descripcionActividad").value.trim();
-      if (!desc) return mostrarMensaje("Escribe la labor realizada hoy", "error");
-      if (!selfieActual) return mostrarMensaje("Tómate una selfie / foto de evidencia", "error");
-
-      const boton = document.getElementById("btnGuardarHonorarios");
-      boton.disabled = true;
-      boton.innerHTML = "Subiendo foto...";
-
-      try {
-        const fotoRes = await llamarAPI({ accion: "guardarSelfie", correo: correoUsuario, imagenBase64: selfieActual });
-        boton.innerHTML = "Guardando actividad...";
-
-        const res = await llamarAPI({
-          accion: "registrarActividadHonorarios",
-          datos: {
-            dniRuc: docUsuario,
-            correo: correoUsuario,
-            sede: document.getElementById("sedeActividad").value,
-            descripcionServicio: desc,
-            latitud: latitudActual || "",
-            longitud: longitudActual || "",
-            selfieUrl: fotoRes.url,
-            deviceId: obtenerDeviceId()
-          }
-        });
-
-        mostrarMensaje(res.mensaje, res.ok ? "ok" : "error");
-        if (res.ok) {
-          document.getElementById("descripcionActividad").value = "";
-          selfieActual = null;
-          document.getElementById("previewSelfie").style.display = "none";
-          document.getElementById("fotoEstado").innerHTML = "";
-          boton.disabled = false;
-          boton.innerHTML = "✅ Registrar actividad de hoy";
-        } else {
-          boton.disabled = false;
-          boton.innerHTML = "✅ Registrar actividad de hoy";
-        }
-      } catch (err) {
-        boton.disabled = false;
-        mostrarMensaje("Error: " + err.message, "error");
-      }
-    }
-
-    async function registrarNuevo() {
+    async function registrarNuevoTrabajador() {
       const dni = document.getElementById("regDni").value.trim();
       const correo = document.getElementById("regCorreo").value.trim();
       const nombres = document.getElementById("regNombres").value.trim();
@@ -592,20 +608,15 @@
       mostrarMensaje("Enviando solicitud a RRHH...", "ok");
       const datos = {
         dni: dni,
-        dniRuc: dni,
         correo: correo,
         nombres: nombres,
         apellidos: apellidos,
         celular: document.getElementById("regCelular").value.trim(),
-        sede: document.getElementById("regSede").value,
-        descripcionServicio: document.getElementById("regServicio").value.trim()
+        sede: document.getElementById("regSede").value
       };
 
       try {
-        const res = await llamarAPI({
-          accion: isHonorarios ? "registrarSolicitudHonorarios" : "registrarSolicitudTrabajador",
-          datos: datos
-        });
+        const res = await llamarAPI({ accion: "registrarSolicitudTrabajador", datos: datos });
         mostrarMensaje(res.mensaje, res.ok ? "ok" : "error");
         if (res.ok) setTimeout(alternarRegistro, 2000);
       } catch (err) {
