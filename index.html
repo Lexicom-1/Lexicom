@@ -518,14 +518,18 @@
       reader.readAsDataURL(file);
     }
 
-    async function ejecutarMarcaje(tipo) {
+async function ejecutarMarcaje(tipo) {
       if (!latitudActual || !longitudActual) return mostrarMensaje("Obtén tu ubicación GPS", "error");
-      if (!selfieActual) return mostrarMensaje("Tómate una selfie primero", "error");
+      if (!selfieActual) return mostrarMensaje("Tómate tu selfie primero", "error");
 
-      if (requiereExcepcion) {
+      // Validar si el panel de justificación ya está visible en pantalla
+      const panelEx = document.getElementById("panelExcepcion");
+      const esExcepcionVisible = panelEx && panelEx.style.display === "block";
+
+      if (esExcepcionVisible) {
         const detalle = document.getElementById("detalleExcepcion").value.trim();
-        if (!detalle) return mostrarMensaje("Escribe la justificación o detalle del trámite", "error");
-        if (!evidenciaActual) return mostrarMensaje("Toma una foto al comprobante o constancia médica", "error");
+        if (!detalle) return mostrarMensaje("Escribe la justificación o detalle del trámite/agencia/cita", "error");
+        if (!evidenciaActual) return mostrarMensaje("Debes tomar la foto del comprobante o evidencia médica", "error");
       }
 
       const boton = (tipo === "INGRESO") ? document.getElementById("btnIngreso") : document.getElementById("btnSalida");
@@ -533,16 +537,21 @@
       boton.innerHTML = "Subiendo fotos...";
 
       try {
+        // 1. Subir selfie personal a Drive
         const fotoRes = await llamarAPI({ accion: "guardarSelfie", correo: correoUsuario, imagenBase64: selfieActual });
+        if (!fotoRes.ok && !fotoRes.url) throw new Error("Error al subir selfie");
 
+        // 2. Subir foto de comprobante/evidencia si el panel está activo
         let urlEvidencia = "";
-        if (requiereExcepcion && evidenciaActual) {
+        if (esExcepcionVisible && evidenciaActual) {
+          boton.innerHTML = "Subiendo comprobante...";
           const evidRes = await llamarAPI({ accion: "guardarSelfie", correo: correoUsuario + "_EVIDENCIA", imagenBase64: evidenciaActual });
-          urlEvidencia = evidRes.url;
+          urlEvidencia = evidRes.url || "";
         }
 
         boton.innerHTML = `Marcando ${tipo.toLowerCase()}...`;
 
+        // 3. Armar el paquete de datos
         const payload = {
           accion: "marcarAsistencia",
           correo: correoUsuario,
@@ -553,7 +562,8 @@
           deviceId: obtenerDeviceId()
         };
 
-        if (requiereExcepcion) {
+        // Si el panel de excepción está activo, enviar datos obligatoriamente
+        if (esExcepcionVisible) {
           payload.datosExcepcion = {
             esExcepcion: true,
             motivo: document.getElementById("motivoExcepcion").value,
@@ -564,17 +574,19 @@
 
         const res = await llamarAPI(payload);
 
-        // Si el sistema detecta fuera de geocerca por primera vez
+        // Si el servidor indica que está fuera de geocerca por primera vez
         if (!res.ok && res.fueraGeocerca) {
-          requiereExcepcion = true;
-          document.getElementById("panelExcepcion").style.display = "block";
+          panelEx.style.display = "block";
           boton.disabled = false;
           boton.innerHTML = `Registrar ${tipo} con Justificación`;
           mostrarMensaje(res.mensaje, "error");
+          // Desplazar la pantalla suavemente hacia el panel de justificación
+          panelEx.scrollIntoView({ behavior: 'smooth' });
           return;
         }
 
         mostrarMensaje(res.mensaje, res.ok ? "ok" : "error");
+
         if (res.ok) {
           boton.innerHTML = `✅ ${tipo} Registrado`;
           boton.style.background = "#16a34a";
@@ -582,9 +594,10 @@
             if (tipo === "INGRESO") {
               document.getElementById("btnIngreso").style.display = "none";
               document.getElementById("btnSalida").style.display = "block";
-              document.getElementById("panelExcepcion").style.display = "none";
+              panelEx.style.display = "none";
+              evidenciaActual = null;
             } else {
-              document.getElementById("marcajePanel").innerHTML = "<h2 style='color:#16a34a;'>✅ Jornada completada</h2>";
+              document.getElementById("marcajePanel").innerHTML = "<h2 style='color:#16a34a; text-align:center;'>✅ Jornada completada</h2>";
             }
           }, 1500);
         } else {
